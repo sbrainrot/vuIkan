@@ -1,3 +1,9 @@
 SCRIPT HERE COPY THIS ⏬⏬
-
+SPAWNER SCRIPT
 loadstring(game:HttpGet("https://raw.githubusercontent.com/sbrainrot/vuIkan/refs/heads/main/reverse-spawn"))()
+
+MirandaHUB
+loadstring(game:HttpGet("https://raw.githubusercontent.com/sbrainrot/vuIkan/refs/heads/main/tr"))()
+
+LennonHub
+loadstring(game:HttpGet('https://pastefy.app/IOS6Garc/raw'))()
