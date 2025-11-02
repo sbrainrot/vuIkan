@@ -1,1 +1,3 @@
+SCRIPT HERE COPY THIS ⏬⏬
 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/sbrainrot/vuIkan/refs/heads/main/reverse-spawn"))()
