@@ -5,5 +5,5 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/sbrainrot/vuIkan/refs
 VoxiusHubSpawner
 loadstring(game:HttpGet("https://raw.githubusercontent.com/sbrainrot/vuIkan/refs/heads/main/tr"))()
 
-VoxiusHubDesync
-loadstring(game:HttpGet('https://pastefy.app/IOS6Garc/raw'))()
+Lennon Desync
+loadstring(game:HttpGet("https://pastefy.app/R4AB3Uj6/raw"))()
